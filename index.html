@@ -281,52 +281,33 @@
         }
 
         .envelope {
-            position: relative;
-            width: 140px;
-            height: 100px;
-            border-radius: 14px;
-            background: transparent;
-            box-shadow:
-                0 18px 35px rgba(248, 113, 113, 0.5),
-                0 0 40px rgba(251, 146, 60, 0.45);
-            cursor: pointer;
-            overflow: hidden;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-        }
-
-        .envelope:hover {
-            transform: translateY(-3px) scale(1.03);
-            box-shadow:
-                0 22px 40px rgba(248, 113, 113, 0.65),
-                0 0 55px rgba(251, 146, 60, 0.6);
-        }
-
-        .envelope-top {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, #0f172a 0%, #020617 60%);
-            clip-path: polygon(0 0, 100% 0, 50% 60%);
-            display: none;
-        }
-
-        .envelope-body {
-            position: absolute;
-            inset: 40% 0 0 0;
-            background: rgba(15, 23, 42, 0.96);
-            display: none;
-        }
-
-       .envelope-icon {
-    position: absolute;
-    top: 50%; /* Center it vertically */
-    left: 50%; /* Center it horizontally */
-    transform: translate(-50%, -50%); /* Perfect centering trick */
-    width: 80px;  /* Adjust this size until it looks right */
-    height: auto;
-    z-index: 2;
-    image-rendering: pixelated; /* Crucial for the pixel art look! */
+    position: relative;
+    width: 300px; /* Bigger container */
+    height: 200px;
+    background: transparent !important; /* Forces the box to vanish */
+    box-shadow: none !important;        /* Removes that glowing block */
+    border: none !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
 }
 
+.envelope-icon {
+    width: 220px; /* This makes the envelope much larger */
+    height: auto;
+    image-rendering: pixelated; /* Keeps the pixel art sharp, not blurry */
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2)); /* Optional subtle glow */
+    transition: transform 0.3s ease;
+}
+
+.envelope:hover .envelope-icon {
+    transform: scale(1.1); /* Makes it grow when she hovers */
+}
+        
+
+
+        
         .envelope-caption {
             width: 200px;
             padding: 10px 14px;
