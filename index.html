@@ -778,23 +778,20 @@ Cheers to YOU!
     <source src="guitar.mp3" type="audio/mpeg">
 </audio>
     <script>
-        // ========== CONFIGURATION ==========
-        // ========== CONFIGURATION & STATE ==========
+        // ========== 1. CONFIGURATION & STATE ==========
         const GUITAR_LOOP_URL = "guitar.mp3";
         let blowDetectionActive = false;
         let audioContext = null;
         let analyser = null;
         let dataArray = null;
         let isCakeBlown = false;
-        let flameInterval = null;
-        let flameIndex = 0;
         let currentBlowState = 0;
         let celebrationInterval = null;
 
         const cakeImg = document.getElementById("cakeImage");
         const tapText = document.getElementById("tapText");
 
-        // ========== MASTER GIFT CLICK LOGIC ==========
+        // ========== 2. MASTER GIFT CLICK (The Trigger) ==========
         window.addEventListener('load', () => {
             const giftBtn = document.getElementById('giftBtn');
             const giftImg = document.querySelector('.gift-img');
@@ -802,23 +799,27 @@ Cheers to YOU!
 
             if (giftBtn) {
                 giftBtn.addEventListener('click', () => {
-                    // 1. Trigger the Explosion & Pop Animation
-                    if (typeof createPixelExplosion === "function") createPixelExplosion();
+                    if (isCakeBlown) return; 
+
+                    // A. Trigger Pixel Explosion
+                    createPixelExplosion(); 
+
+                    // B. Start Pop & Fade Animation
                     if (giftImg) giftImg.classList.add('gift-pop-effect');
 
-                    // 2. Play the Music
+                    // C. Play Music
                     if (guitarMusic) {
                         guitarMusic.volume = 0.6;
-                        guitarMusic.play().catch(e => console.log("Audio waiting..."));
+                        guitarMusic.play().catch(e => console.log("Audio waiting for interaction..."));
                     }
 
-                    // 3. START THE BLOW DETECTION POPUP
+                    // D. Start Microphone logic
                     initializeBlow();
                 });
             }
         });
 
-        // ========== BLOW DETECTION FUNCTIONS ==========
+        // ========== 3. UNIFIED BLOW MECHANICS ==========
         function initializeBlow() {
             if (blowDetectionActive) return;
             
@@ -836,8 +837,7 @@ Cheers to YOU!
                     detectBlow();
                 })
                 .catch(err => {
-                    alert("Mic access is needed to blow out the candle!");
-                    console.log("Mic access denied:", err);
+                    console.log("Microphone access denied:", err);
                 });
         }
 
@@ -865,7 +865,7 @@ Cheers to YOU!
             if (newState > currentBlowState) {
                 currentBlowState = newState;
                 const images = ["cake1.jpg", "20.jpg", "40.jpg", "80.jpg", "100.jpg"];
-                cakeImg.src = images[newState];
+                if (cakeImg) cakeImg.src = images[newState];
 
                 if (newState === 4) completeBlowOut();
             }
@@ -889,205 +889,12 @@ Cheers to YOU!
             }, 4500);
         }
 
-// This helper function actually turns off the flame
-function extinguishCandle() {
-    const flame = document.querySelector('.flame'); 
-    if (flame) {
-        flame.style.opacity = '0';
-        setTimeout(() => flame.style.display = 'none', 500);
-    }
-}
-        
-        // ========== INITIALIZE STARS ==========
-        function initializeStars() {
-            const starsContainer = document.getElementById("backgroundStars");
-            const starCount = 36;
-
-            for (let i = 0; i < starCount; i++) {
-                const star = document.createElement("div");
-                star.className = "star";
-                const cluster = Math.random();
-                const x = cluster < 0.3 ? Math.random() * 45 : cluster < 0.55 ? 30 + Math.random() * 40 : cluster < 0.75 ? Math.random() * 45 : 60 + Math.random() * 40;
-                const y = cluster < 0.3 ? Math.random() * 35 : cluster < 0.55 ? 55 + Math.random() * 35 : cluster < 0.75 ? 60 + Math.random() * 30 : Math.random() * 30;
-                const drift = 10 + Math.random() * 14;
-                const delay = Math.random() * 6;
-                const twinkle = 1.4 + Math.random() * 2.2;
-                const size = 16 + Math.random() * 26;
-                const opacity = 0.4 + Math.random() * 0.45;
-
-                star.style.left = x + "%";
-                star.style.top = y + "%";
-                star.style.setProperty("--size", `${size}px`);
-                star.style.setProperty("--drift", `${drift}s`);
-                star.style.setProperty("--twinkle", `${twinkle}s`);
-                star.style.animationDelay = `${delay}s, ${Math.random() * 2}s`;
-                star.style.setProperty("--opacity", opacity.toFixed(2));
-
-                starsContainer.appendChild(star);
-            }
-
-            const extraRightCount = 16;
-            for (let i = 0; i < extraRightCount; i++) {
-                const star = document.createElement("div");
-                star.className = "star";
-                const x = 60 + Math.random() * 38;
-                const y = 45 + Math.random() * 40;
-                const drift = 10 + Math.random() * 14;
-                const delay = Math.random() * 6;
-                const twinkle = 1.4 + Math.random() * 2.2;
-                const size = 16 + Math.random() * 26;
-                const opacity = 0.4 + Math.random() * 0.45;
-
-                star.style.left = x + "%";
-                star.style.top = y + "%";
-                star.style.setProperty("--size", `${size}px`);
-                star.style.setProperty("--drift", `${drift}s`);
-                star.style.setProperty("--twinkle", `${twinkle}s`);
-                star.style.animationDelay = `${delay}s, ${Math.random() * 2}s`;
-                star.style.setProperty("--opacity", opacity.toFixed(2));
-
-                starsContainer.appendChild(star);
-            }
-
-            const extraLeftBottomCount = 10;
-            for (let i = 0; i < extraLeftBottomCount; i++) {
-                const star = document.createElement("div");
-                star.className = "star";
-                const x = Math.random() * 42;
-                const y = 62 + Math.random() * 32;
-                const drift = 10 + Math.random() * 14;
-                const delay = Math.random() * 6;
-                const twinkle = 1.4 + Math.random() * 2.2;
-                const size = 16 + Math.random() * 26;
-                const opacity = 0.4 + Math.random() * 0.45;
-
-                star.style.left = x + "%";
-                star.style.top = y + "%";
-                star.style.setProperty("--size", `${size}px`);
-                star.style.setProperty("--drift", `${drift}s`);
-                star.style.setProperty("--twinkle", `${twinkle}s`);
-                star.style.animationDelay = `${delay}s, ${Math.random() * 2}s`;
-                star.style.setProperty("--opacity", opacity.toFixed(2));
-
-                starsContainer.appendChild(star);
-            }
-        }
-
-        // ========== COMMAND PROMPT TYPEWRITER ==========
-        const commandLinesDiv = document.getElementById("commandLines");
-        const codeInput = document.getElementById("codeInput");
-        const commandPrompt = document.getElementById("commandPromptScreen");
-        const birthdayScene = document.getElementById("birthdayScene");
-
-        const messages = [
-            "* Initializing birthday system...",
-            "* Loading special memories... [OK]",
-            "* Checking if you deserve this... [YES]",
-            "* Preparing your surprise... [READY]",
-            "",
-            "* Today is YOUR BIRTHDAY!",
-            "* I made something special for you...",
-            "* All systems ready!"
-        ];
-
-        let msgIndex = 0;
-        let charIndex = 0;
-
-        function typeMessage() {
-            if (msgIndex >= messages.length) return;
-
-            const lineId = "line-" + msgIndex;
-            let lineEl = document.getElementById(lineId);
-            if (!lineEl) {
-                lineEl = document.createElement("div");
-                lineEl.id = lineId;
-                lineEl.className = "terminal-line terminal-info";
-                commandLinesDiv.appendChild(lineEl);
-            }
-
-            const text = messages[msgIndex];
-            if (charIndex < text.length) {
-                lineEl.textContent += text.charAt(charIndex);
-                charIndex++;
-                setTimeout(typeMessage, 75);
-            } else {
-                msgIndex++;
-                charIndex = 0;
-                setTimeout(typeMessage, 600);
-            }
-        }
-
-        setTimeout(typeMessage, 500);
-
-        codeInput.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                const code = codeInput.value.trim().toLowerCase();
-                if (code === "10-h") {
-                    const successLine = document.createElement("div");
-                    successLine.className = "terminal-line terminal-success";
-                    successLine.textContent = "* Code accepted! System unlocking...";
-                    commandLinesDiv.appendChild(successLine);
-                    codeInput.disabled = true;
-
-                    setTimeout(() => {
-                        transitionToBirthdayScene();
-                    }, 800);
-                } else {
-                    const errorLine = document.createElement("div");
-                    errorLine.className = "terminal-line terminal-info";
-                    errorLine.textContent = "* Invalid code. Try again...";
-                    commandLinesDiv.appendChild(errorLine);
-                    codeInput.value = "";
-                }
-            }
-        });
-
-        function transitionToBirthdayScene() {
-            commandPrompt.classList.add("fade-out");
-            setTimeout(() => {
-                commandPrompt.style.display = "none";
-                birthdayScene.style.display = "block";
-                setTimeout(() => {
-                    birthdayScene.classList.add("fade-in");
-                }, 10);
-            }, 600);
-
-            initializeStars();
-            startFlameWave();
-        }
-
-        // ========== FLAME WAVE & BLOW DETECTION ==========
-        let blowDetectionActive = false;
-        let audioContext = null;
-        let analyser = null;
-        let dataArray = null;
-        let isCakeBlown = false;
-        let flameInterval = null;
-        let flameIndex = 0;
-        let currentBlowState = 0;
-        let celebrationInterval = null;
-
-        const cakeImg = document.getElementById("cakeImage");
-        const tapText = document.getElementById("tapText");
-
-        function startFlameWave() {
-            if (flameInterval) clearInterval(flameInterval);
-            flameIndex = 0;
-            flameInterval = setInterval(() => {
-                if (isCakeBlown) {
-                    clearInterval(flameInterval);
-                    return;
-                }
-                flameIndex = (flameIndex + 1) % 3;
-                const flameImages = ["cake1.jpg", "cake2.jpg", "cake3.jpg"];
-                cakeImg.src = flameImages[flameIndex];
-            }, 240);
-        }
-
-        // ========== PIXEL EXPLOSION ==========
+        // ========== 4. PIXEL EXPLOSION LOGIC ==========
         function createPixelExplosion() {
-           const giftBtn = document.getElementById("giftBtn"); 
-const rect = giftBtn.getBoundingClientRect()
+            const giftBtn = document.getElementById("giftBtn");
+            if (!giftBtn) return;
+
+            const rect = giftBtn.getBoundingClientRect();
             const pixelSize = 14;
             const pixels = [];
             const palette = ["#fb7185", "#f97316", "#facc15", "#fef3c7", "#60a5fa"];
@@ -1095,11 +902,7 @@ const rect = giftBtn.getBoundingClientRect()
             for (let py = 0; py < rect.height; py += pixelSize) {
                 for (let px = 0; px < rect.width; px += pixelSize) {
                     const color = palette[Math.floor(Math.random() * palette.length)];
-                    pixels.push({
-                        x: rect.left + px,
-                        y: rect.top + py,
-                        color
-                    });
+                    pixels.push({ x: rect.left + px, y: rect.top + py, color });
                 }
             }
 
@@ -1129,42 +932,118 @@ const rect = giftBtn.getBoundingClientRect()
                         frame++;
                         vx *= 0.97;
                         vy += 0.2;
-
                         fragment.style.transform = `translate(${vx * frame}px, ${vy * frame}px)`;
                         fragment.style.opacity = Math.max(0, 1 - frame / 90);
-
-                        if (frame < 90) {
-                            requestAnimationFrame(animate);
-                        } else {
-                            fragment.remove();
-                        }
+                        if (frame < 90) { requestAnimationFrame(animate); } else { fragment.remove(); }
                     };
                     animate();
                 }, idx * 2);
             });
-
-            setTimeout(() => {
-                tapText.style.display = "block";
-                initializeBlow();
-            }, 900);
         }
 
-        document.getElementById("presentBtn").addEventListener("click", () => {
-            if (!blowDetectionActive && !isCakeBlown) {
-                createPixelExplosion();
+        // ========== 5. STARS LOGIC ==========
+        function initializeStars() {
+            const starsContainer = document.getElementById("backgroundStars");
+            if (!starsContainer) return;
+            const starCount = 45;
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement("div");
+                star.className = "star";
+                star.style.left = Math.random() * 100 + "%";
+                star.style.top = Math.random() * 100 + "%";
+                star.style.setProperty("--size", `${16 + Math.random() * 26}px`);
+                star.style.setProperty("--drift", `${12 + Math.random() * 15}s`);
+                star.style.setProperty("--twinkle", `${1.5 + Math.random() * 2}s`);
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.setProperty("--opacity", (0.3 + Math.random() * 0.5).toFixed(2));
+                starsContainer.appendChild(star);
+            }
+        }
 
-                const voiceAudio = document.getElementById("voiceMessage");
-                try {
-                    voiceAudio.currentTime = 0;
-                    voiceAudio.play();
-                } catch (e) {
-                    console.log("Audio play blocked:", e);
+        // ========== 6. TERMINAL & TYPEWRITER LOGIC ==========
+        const commandLinesDiv = document.getElementById("commandLines");
+        const codeInput = document.getElementById("codeInput");
+        const commandPrompt = document.getElementById("commandPromptScreen");
+        const birthdayScene = document.getElementById("birthdayScene");
+
+        const messages = [
+            "* Initializing birthday system...",
+            "* Loading special memories... [OK]",
+            "* Checking if you deserve this... [YES]",
+            "* Preparing your surprise... [READY]",
+            "",
+            "* Today is YOUR BIRTHDAY!",
+            "* I made something special for you...",
+            "* All systems ready!"
+        ];
+
+        let msgIndex = 0;
+        let charIndex = 0;
+
+        function typeMessage() {
+            if (!commandLinesDiv || msgIndex >= messages.length) return;
+            const lineId = "line-" + msgIndex;
+            let lineEl = document.getElementById(lineId);
+            if (!lineEl) {
+                lineEl = document.createElement("div");
+                lineEl.id = lineId;
+                lineEl.className = "terminal-line terminal-info";
+                commandLinesDiv.appendChild(lineEl);
+            }
+            const text = messages[msgIndex];
+            if (charIndex < text.length) {
+                lineEl.textContent += text.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeMessage, 50);
+            } else {
+                msgIndex++;
+                charIndex = 0;
+                setTimeout(typeMessage, 500);
+            }
+        }
+
+        codeInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                const code = codeInput.value.trim().toLowerCase();
+                if (code === "10-h") {
+                    const successLine = document.createElement("div");
+                    successLine.className = "terminal-line terminal-success";
+                    successLine.textContent = "* Code accepted! System unlocking...";
+                    commandLinesDiv.appendChild(successLine);
+                    codeInput.disabled = true;
+                    setTimeout(transitionToBirthdayScene, 800);
+                } else {
+                    const errorLine = document.createElement("div");
+                    errorLine.className = "terminal-line terminal-info";
+                    errorLine.textContent = "* Invalid code. Try again...";
+                    commandLinesDiv.appendChild(errorLine);
+                    codeInput.value = "";
                 }
             }
         });
 
-       
-        // ========== CONFETTI & FIREWORKS ==========
+        function transitionToBirthdayScene() {
+            commandPrompt.classList.add("fade-out");
+            setTimeout(() => {
+                commandPrompt.style.display = "none";
+                birthdayScene.style.display = "block";
+                setTimeout(() => { birthdayScene.classList.add("fade-in"); }, 10);
+            }, 600);
+            initializeStars();
+            startFlameWave();
+        }
+
+        function startFlameWave() {
+            flameIndex = 0;
+            const flameInterval = setInterval(() => {
+                if (isCakeBlown || blowDetectionActive) { clearInterval(flameInterval); return; }
+                flameIndex = (flameIndex + 1) % 3;
+                const images = ["cake1.jpg", "cake2.jpg", "cake3.jpg"];
+                cakeImg.src = images[flameIndex];
+            }, 240);
+        }
+
+        // ========== 7. CELEBRATION HELPERS ==========
         function triggerConfetti(count = 90) {
             const colors = ["#fb7185", "#facc15", "#38bdf8", "#a855f7", "#22c55e"];
             for (let i = 0; i < count; i++) {
@@ -1179,66 +1058,29 @@ const rect = giftBtn.getBoundingClientRect()
         }
 
         function triggerFireworks() {
-            const gradients = [
-                { from: "#fb7185", to: "#fbbf24" },
-                { from: "#fbbf24", to: "#22c55e" },
-                { from: "#38bdf8", to: "#a855f7" },
-                { from: "#a855f7", to: "#fb7185" },
-                { from: "#22c55e", to: "#38bdf8" }
-            ];
-
+            const colors = ["#fb7185", "#fbbf24", "#38bdf8", "#a855f7", "#22c55e"];
             for (let i = 0; i < 3; i++) {
                 const originX = 18 + i * 26 + Math.random() * 3;
                 const originY = 38 + Math.random() * 22;
-                const gradient = gradients[i % gradients.length];
-                const count = 30 + Math.floor(Math.random() * 12);
-                const maxDistance = 8 + Math.random() * 6;
-                const duration = 48 + Math.random() * 12;
-
-                for (let j = 0; j < count; j++) {
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                for (let j = 0; j < 35; j++) {
                     const dot = document.createElement("div");
                     dot.className = "firework-dot";
                     dot.style.left = originX + "vw";
                     dot.style.top = originY + "vh";
-
-                    const progress = j / count;
-                    const r = Math.round(parseInt(gradient.from.slice(1, 3), 16) * (1 - progress) + parseInt(gradient.to.slice(1, 3), 16) * progress);
-                    const g = Math.round(parseInt(gradient.from.slice(3, 5), 16) * (1 - progress) + parseInt(gradient.to.slice(3, 5), 16) * progress);
-                    const b = Math.round(parseInt(gradient.from.slice(5, 7), 16) * (1 - progress) + parseInt(gradient.to.slice(5, 7), 16) * progress);
-
-                    dot.style.background = `rgb(${r}, ${g}, ${b})`;
-                    dot.style.boxShadow = `0 0 10px rgba(${r}, ${g}, ${b}, 0.85)`;
-                    dot.style.width = `${5 + Math.random() * 3}px`;
-                    dot.style.height = dot.style.width;
-
+                    dot.style.background = color;
+                    dot.style.boxShadow = `0 0 10px ${color}`;
                     document.body.appendChild(dot);
-
                     const angle = Math.random() * Math.PI * 2;
-                    const distance = maxDistance * (0.7 + Math.random() * 0.6);
-                    let frame = 0;
-                    const drift = (Math.random() - 0.5) * 0.6;
-
-                    const animate = () => {
-                        frame++;
-                        const t = frame / duration;
-                        const ease = 1 - Math.pow(1 - t, 2.4);
-                        const x = Math.cos(angle + drift * t) * distance * ease;
-                        const y = Math.sin(angle + drift * t) * distance * ease + t * 6;
-                        dot.style.transform = `translate(${x}vw, ${y}vh)`;
-                        dot.style.opacity = Math.max(0, 1 - t * 1.1);
-
-                        if (frame < duration) {
-                            requestAnimationFrame(animate);
-                        } else {
-                            dot.remove();
-                        }
-                    };
-                    animate();
+                    const dist = 8 + Math.random() * 8;
+                    dot.animate([
+                        { transform: 'translate(0, 0)', opacity: 1 },
+                        { transform: `translate(${Math.cos(angle) * dist}vw, ${Math.sin(angle) * dist}vh)`, opacity: 0 }
+                    ], { duration: 1500, easing: 'ease-out' }).onfinish = () => dot.remove();
                 }
             }
         }
 
-        // ========== ENVELOPE & NOTE ==========
         document.getElementById("envelopeBtn").addEventListener("click", () => {
             document.getElementById("noteModal").style.display = "flex";
         });
@@ -1246,6 +1088,10 @@ const rect = giftBtn.getBoundingClientRect()
         function closeNote() {
             document.getElementById("noteModal").style.display = "none";
         }
+
+        // INITIAL KICKOFF
+        setTimeout(typeMessage, 500);
     </script>
+
 </body>
 </html>
