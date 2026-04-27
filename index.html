@@ -780,19 +780,62 @@ Cheers to YOU!
     <script>
         // ========== CONFIGURATION ==========
         const GUITAR_LOOP_URL = "guitar.mp3";
-// PASTE THE CLICK LOGIC HERE (Around line 40)
-   window.addEventListener('load', () => {
+// PASTE THE CLICK LOGIC HERE 
+  window.addEventListener('load', () => {
     const giftBtn = document.getElementById('giftBtn');
     const giftImg = document.querySelector('.gift-img');
     const guitarMusic = document.getElementById('guitarAudio');
 
     if (giftBtn) {
-        giftBtn.addEventListener('click', () => {
-            giftImg.classList.add('gift-pop-effect');
-            guitarMusic.play().catch(e => console.log("Playback error:", e));
+        // We added 'async' here so the microphone permission works
+        giftBtn.addEventListener('click', async () => {
+            // 1. Start the Pop & Fade Animation
+            if (giftImg) giftImg.classList.add('gift-pop-effect');
+
+            // 2. Play your guitar track
+            guitarMusic.play().catch(e => console.log("Music play blocked"));
+
+            // 3. TRIGGER THE MICROPHONE POPUP
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const analyser = audioContext.createAnalyser();
+                const source = audioContext.createMediaStreamSource(stream);
+                source.connect(analyser);
+                analyser.fftSize = 256;
+
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+
+                function checkBlow() {
+                    analyser.getByteFrequencyData(dataArray);
+                    let sum = 0;
+                    for (let i = 0; i < bufferLength; i++) { sum += dataArray[i]; }
+                    let average = sum / bufferLength;
+
+                    // If noise is loud enough, blow out the candle
+                    if (average > 50) { 
+                        extinguishCandle();
+                    }
+                    requestAnimationFrame(checkBlow);
+                }
+                checkBlow();
+            } catch (err) {
+                alert("Please allow microphone access to blow out the candle!");
+                console.error("Mic error:", err);
+            }
         });
     }
 });
+
+// This helper function actually turns off the flame
+function extinguishCandle() {
+    const flame = document.querySelector('.flame'); 
+    if (flame) {
+        flame.style.opacity = '0';
+        setTimeout(() => flame.style.display = 'none', 500);
+    }
+}
         
         // ========== INITIALIZE STARS ==========
         function initializeStars() {
