@@ -404,7 +404,7 @@
 
 /* 2. The Image: Sharp and ready */
 .gift-img {
-    width: 160px; /* Adjust size here */
+    width: 190px; /* Adjust size here */
     height: auto;
     image-rendering: pixelated;
     transition: transform 0.2s ease;
@@ -416,9 +416,9 @@
 }
 
 @keyframes giftPop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.4); } /* The 'Burst' */
-    100% { transform: scale(1.2); } /* Stays slightly bigger */
+    0% { transform: scale(1); opacity: 1; }
+    45% { transform: scale(1.4); opacity: 1; }
+    100% { transform: scale(1.8); opacity: 0; } /* This makes it vanish! */
 }
            
         @keyframes giftFloat {
@@ -779,54 +779,115 @@ Cheers to YOU!
 </audio>
     <script>
         // ========== CONFIGURATION ==========
+        // ========== CONFIGURATION & STATE ==========
         const GUITAR_LOOP_URL = "guitar.mp3";
-// PASTE THE CLICK LOGIC HERE 
-  window.addEventListener('load', () => {
-    const giftBtn = document.getElementById('giftBtn');
-    const giftImg = document.querySelector('.gift-img');
-    const guitarMusic = document.getElementById('guitarAudio');
+        let blowDetectionActive = false;
+        let audioContext = null;
+        let analyser = null;
+        let dataArray = null;
+        let isCakeBlown = false;
+        let flameInterval = null;
+        let flameIndex = 0;
+        let currentBlowState = 0;
+        let celebrationInterval = null;
 
-    if (giftBtn) {
-        // We added 'async' here so the microphone permission works
-        giftBtn.addEventListener('click', async () => {
-            // 1. Start the Pop & Fade Animation
-            if (giftImg) giftImg.classList.add('gift-pop-effect');
+        const cakeImg = document.getElementById("cakeImage");
+        const tapText = document.getElementById("tapText");
 
-            // 2. Play your guitar track
-            guitarMusic.play().catch(e => console.log("Music play blocked"));
+        // ========== MASTER GIFT CLICK LOGIC ==========
+        window.addEventListener('load', () => {
+            const giftBtn = document.getElementById('giftBtn');
+            const giftImg = document.querySelector('.gift-img');
+            const guitarMusic = document.getElementById('guitarAudio');
 
-            // 3. TRIGGER THE MICROPHONE POPUP
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const analyser = audioContext.createAnalyser();
-                const source = audioContext.createMediaStreamSource(stream);
-                source.connect(analyser);
-                analyser.fftSize = 256;
+            if (giftBtn) {
+                giftBtn.addEventListener('click', () => {
+                    // 1. Trigger the Explosion & Pop Animation
+                    if (typeof createPixelExplosion === "function") createPixelExplosion();
+                    if (giftImg) giftImg.classList.add('gift-pop-effect');
 
-                const bufferLength = analyser.frequencyBinCount;
-                const dataArray = new Uint8Array(bufferLength);
-
-                function checkBlow() {
-                    analyser.getByteFrequencyData(dataArray);
-                    let sum = 0;
-                    for (let i = 0; i < bufferLength; i++) { sum += dataArray[i]; }
-                    let average = sum / bufferLength;
-
-                    // If noise is loud enough, blow out the candle
-                    if (average > 50) { 
-                        extinguishCandle();
+                    // 2. Play the Music
+                    if (guitarMusic) {
+                        guitarMusic.volume = 0.6;
+                        guitarMusic.play().catch(e => console.log("Audio waiting..."));
                     }
-                    requestAnimationFrame(checkBlow);
-                }
-                checkBlow();
-            } catch (err) {
-                alert("Please allow microphone access to blow out the candle!");
-                console.error("Mic error:", err);
+
+                    // 3. START THE BLOW DETECTION POPUP
+                    initializeBlow();
+                });
             }
         });
-    }
-});
+
+        // ========== BLOW DETECTION FUNCTIONS ==========
+        function initializeBlow() {
+            if (blowDetectionActive) return;
+            
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    blowDetectionActive = true;
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    analyser = audioContext.createAnalyser();
+                    analyser.fftSize = 256;
+                    const source = audioContext.createMediaStreamSource(stream);
+                    source.connect(analyser);
+                    dataArray = new Uint8Array(analyser.frequencyBinCount);
+                    
+                    if (tapText) tapText.style.display = "block";
+                    detectBlow();
+                })
+                .catch(err => {
+                    alert("Mic access is needed to blow out the candle!");
+                    console.log("Mic access denied:", err);
+                });
+        }
+
+        function detectBlow() {
+            if (!blowDetectionActive || !analyser) return;
+            analyser.getByteFrequencyData(dataArray);
+
+            let lowFreqEnergy = 0;
+            for (let i = 0; i < 10; i++) { lowFreqEnergy += dataArray[i]; }
+            lowFreqEnergy /= 10;
+
+            if (lowFreqEnergy > 105) triggerBlowAnimation(lowFreqEnergy);
+            requestAnimationFrame(detectBlow);
+        }
+
+        function triggerBlowAnimation(intensity) {
+            if (isCakeBlown) return;
+
+            let newState = 0;
+            if (intensity > 105) newState = 1;
+            if (intensity > 140) newState = 2;
+            if (intensity > 180) newState = 3;
+            if (intensity > 220) newState = 4;
+
+            if (newState > currentBlowState) {
+                currentBlowState = newState;
+                const images = ["cake1.jpg", "20.jpg", "40.jpg", "80.jpg", "100.jpg"];
+                cakeImg.src = images[newState];
+
+                if (newState === 4) completeBlowOut();
+            }
+        }
+
+        function completeBlowOut() {
+            isCakeBlown = true;
+            blowDetectionActive = false;
+            if (tapText) tapText.style.display = "none";
+
+            triggerConfetti(90);
+            triggerFireworks();
+            
+            if (celebrationInterval) clearInterval(celebrationInterval);
+            let repeats = 0;
+            celebrationInterval = setInterval(() => {
+                repeats += 1;
+                triggerConfetti(70);
+                triggerFireworks();
+                if (repeats >= 3) clearInterval(celebrationInterval);
+            }, 4500);
+        }
 
 // This helper function actually turns off the flame
 function extinguishCandle() {
@@ -1025,8 +1086,8 @@ function extinguishCandle() {
 
         // ========== PIXEL EXPLOSION ==========
         function createPixelExplosion() {
-            const presentBtn = document.getElementById("presentBtn");
-            const rect = presentBtn.getBoundingClientRect();
+           const giftBtn = document.getElementById("giftBtn"); 
+const rect = giftBtn.getBoundingClientRect()
             const pixelSize = 14;
             const pixels = [];
             const palette = ["#fb7185", "#f97316", "#facc15", "#fef3c7", "#60a5fa"];
@@ -1042,8 +1103,8 @@ function extinguishCandle() {
                 }
             }
 
-            presentBtn.style.opacity = "0";
-            presentBtn.style.pointerEvents = "none";
+            giftBtn.style.opacity = "0";
+            giftBtn.style.pointerEvents = "none";
 
             pixels.forEach((pixel, idx) => {
                 setTimeout(() => {
@@ -1102,82 +1163,7 @@ function extinguishCandle() {
             }
         });
 
-        function initializeBlow() {
-            if (blowDetectionActive) return;
-            blowDetectionActive = true;
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(stream => {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    analyser = audioContext.createAnalyser();
-                    analyser.fftSize = 256;
-                    const source = audioContext.createMediaStreamSource(stream);
-                    source.connect(analyser);
-                    dataArray = new Uint8Array(analyser.frequencyBinCount);
-                    detectBlow();
-                })
-                .catch(err => console.log("Microphone access denied:", err));
-        }
-
-        function detectBlow() {
-            if (!blowDetectionActive || !analyser) return;
-            analyser.getByteFrequencyData(dataArray);
-
-            let lowFreqEnergy = 0;
-            for (let i = 0; i < 10; i++) {
-                lowFreqEnergy += dataArray[i];
-            }
-            lowFreqEnergy /= 10;
-
-            if (lowFreqEnergy > 105) triggerBlowAnimation(lowFreqEnergy);
-
-            requestAnimationFrame(detectBlow);
-        }
-
-        function triggerBlowAnimation(intensity) {
-            if (isCakeBlown) return;
-
-            let newState = 0;
-            if (intensity > 105) newState = 1;
-            if (intensity > 140) newState = 2;
-            if (intensity > 180) newState = 3;
-            if (intensity > 220) newState = 4;
-
-            if (newState > currentBlowState) {
-                currentBlowState = newState;
-                const images = ["cake1.jpg", "20.jpg", "40.jpg", "80.jpg", "100.jpg"];
-                cakeImg.src = images[newState];
-
-                if (newState === 4) {
-                    completeBlowOut();
-                }
-            }
-        }
-
-        function completeBlowOut() {
-            isCakeBlown = true;
-            blowDetectionActive = false;
-            tapText.style.display = "none";
-
-            triggerConfetti(90);
-            triggerFireworks();
-            if (celebrationInterval) clearInterval(celebrationInterval);
-            let repeats = 0;
-            celebrationInterval = setInterval(() => {
-                repeats += 1;
-                triggerConfetti(70);
-                triggerFireworks();
-                if (repeats >= 3) {
-                    clearInterval(celebrationInterval);
-                }
-            }, 4500);
-        }
-
-        cakeImg.addEventListener("click", () => {
-            if (!isCakeBlown && blowDetectionActive) {
-                completeBlowOut();
-            }
-        });
-
+       
         // ========== CONFETTI & FIREWORKS ==========
         function triggerConfetti(count = 90) {
             const colors = ["#fb7185", "#facc15", "#38bdf8", "#a855f7", "#22c55e"];
