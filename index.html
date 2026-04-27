@@ -386,28 +386,41 @@
             justify-content: center;
         }
 
-        .present {
-            position: absolute;
-            width: 160px;
-            height: 160px;
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #1f2937;
-            font-weight: 700;
-            font-size: 12px;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-            animation: giftFloat 6s ease-in-out infinite;
-            z-index: 5;
-            overflow: hidden;
-            background-image: url("gift.jpg");
-            background-size: cover;
-            background-position: center;
-            border: 3px solid rgba(255, 255, 255, 0.25);
-        }
+        /* 1. The Container: Kills the gray border and box */
+.gift {
+    position: relative;
+    width: 220px; /* Adjust based on your layout */
+    height: 180px;
+    background: transparent !important;
+    background-color: rgba(0,0,0,0) !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
 
+/* 2. The Image: Sharp and ready */
+.gift-img {
+    width: 160px; /* Adjust size here */
+    height: auto;
+    image-rendering: pixelated;
+    transition: transform 0.2s ease;
+}
+
+/* 3. The Animation Class: JavaScript will trigger this */
+.gift-pop-effect {
+    animation: giftPop 0.4s ease-out forwards;
+}
+
+@keyframes giftPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.4); } /* The 'Burst' */
+    100% { transform: scale(1.2); } /* Stays slightly bigger */
+}
+           
         @keyframes giftFloat {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-6px); }
@@ -759,11 +772,26 @@ Cheers to YOU!
             <source src="VOICE_MESSAGE_URL_HERE" type="audio/mpeg">
         </audio>
     </div>
-
+<audio id="guitarAudio" loop>
+    <source src="guitar.mp3" type="audio/mpeg">
+</audio>
     <script>
         // ========== CONFIGURATION ==========
-        const GUITAR_LOOP_URL = "GUITAR_URL_HERE";
+        const GUITAR_LOOP_URL = "guitar.mp3";
+// PASTE THE CLICK LOGIC HERE (Around line 40)
+   window.addEventListener('load', () => {
+    const giftBtn = document.getElementById('giftBtn');
+    const giftImg = document.querySelector('.gift-img');
+    const guitarMusic = document.getElementById('guitarAudio');
 
+    if (giftBtn) {
+        giftBtn.addEventListener('click', () => {
+            giftImg.classList.add('gift-pop-effect');
+            guitarMusic.play().catch(e => console.log("Playback error:", e));
+        });
+    }
+});
+        
         // ========== INITIALIZE STARS ==========
         function initializeStars() {
             const starsContainer = document.getElementById("backgroundStars");
