@@ -792,27 +792,33 @@ Cheers to YOU!
         const tapText = document.getElementById("tapText");
 
         // ========= GIFT CLICK (The Trigger) ==========
-      giftBtn.addEventListener('click', () => {
-                if (isCakeBlown) return; 
+    window.addEventListener('load', () => {
+            const giftBtn = document.getElementById('giftBtn');
+            const giftImg = document.querySelector('.gift-img');
 
-                // 1. STOP the flickering immediately
-                if (flameInterval) clearInterval(flameInterval);
+            if (giftBtn) {
+                giftBtn.addEventListener('click', () => {
+                    // Stop the flickering flame wave
+                    if (flameInterval) clearInterval(flameInterval);
 
-                // 2. Trigger the explosion
-                if (typeof createPixelExplosion === "function") createPixelExplosion();
-                if (giftImg) giftImg.classList.add('gift-pop-effect');
+                    // Trigger the visual explosion
+                    // We use a "try-catch" so even if explosion fails, the mic still starts
+                    try {
+                        createPixelExplosion();
+                    } catch (e) {
+                        console.log("Explosion failed, but moving on...");
+                        giftBtn.style.opacity = "0"; 
+                    }
 
-                // 3. Play Music at lower volume (Ducking)
-                if (guitarMusic) {
-                    guitarMusic.volume = 0.3; 
-                    guitarMusic.play().catch(e => console.log("Audio waiting..."));
-                }
+                    if (giftImg) giftImg.classList.add('gift-pop-effect');
 
-                // 4. Start Microphone with a 500ms delay
-                setTimeout(() => {
-                    initializeBlow();
-                }, 500);
-            });
+                    // Start Microphone with a tiny delay
+                    setTimeout(() => {
+                        initializeBlow();
+                    }, 500);
+                });
+            }
+        });
         // ========== 3 BLOW MECHANICS ==========
         function initializeBlow() {
             if (blowDetectionActive) return;
@@ -1016,20 +1022,28 @@ Cheers to YOU!
             }
         });
 
-        function transitionToBirthdayScene() {
+       function transitionToBirthdayScene() {
             commandPrompt.classList.add("fade-out");
+            
+            // START THE MUSIC HERE
+            const guitarMusic = document.getElementById('guitarAudio');
+            if (guitarMusic) {
+                guitarMusic.volume = 0.3; 
+                guitarMusic.play().catch(e => console.log("Audio waiting..."));
+            }
+
             setTimeout(() => {
                 commandPrompt.style.display = "none";
                 birthdayScene.style.display = "block";
                 setTimeout(() => { birthdayScene.classList.add("fade-in"); }, 10);
             }, 600);
+            
             initializeStars();
             startFlameWave();
         }
-
         function startFlameWave() {
             flameIndex = 0;
-            const flameInterval = setInterval(() => {
+             flameInterval = setInterval(() => {
                 if (isCakeBlown || blowDetectionActive) { clearInterval(flameInterval); return; }
                 flameIndex = (flameIndex + 1) % 3;
                 const images = ["cake1.jpg", "cake2.jpg", "cake3.jpg"];
