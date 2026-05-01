@@ -878,7 +878,7 @@ Cheers to YOU!
 
             triggerConfetti(90);
             triggerFireworks();
-            if (guitarMusic) guitarMusic.volume = 0.8;
+            if (guitarMusic) guitarMusic.volume = 1;
             if (celebrationInterval) clearInterval(celebrationInterval);
             let repeats = 0;
             celebrationInterval = setInterval(() => {
@@ -1028,7 +1028,7 @@ Cheers to YOU!
             // START THE MUSIC HERE
             const guitarMusic = document.getElementById('guitarAudio');
             if (guitarMusic) {
-                guitarMusic.volume = 0.3; 
+                guitarMusic.volume = 0.5; 
                 guitarMusic.play().catch(e => console.log("Audio waiting..."));
             }
 
