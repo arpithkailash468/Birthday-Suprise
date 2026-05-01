@@ -282,10 +282,10 @@
 
         .envelope {
     position: relative;
-    width: 300px; /* Bigger container */
+    width: 300px; 
     height: 200px;
-    background: transparent !important; /* Forces the box to vanish */
-    box-shadow: none !important;        /* Removes that glowing block */
+    background: transparent !important; 
+    box-shadow: none !important;       
     border: none !important;
     display: flex;
     justify-content: center;
@@ -294,15 +294,15 @@
 }
 
 .envelope-icon {
-    width: 220px; /* This makes the envelope much larger */
+    width: 220px; 
     height: auto;
-    image-rendering: pixelated; /* Keeps the pixel art sharp, not blurry */
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2)); /* Optional subtle glow */
+    image-rendering: pixelated; 
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2)); 
     transition: transform 0.3s ease;
 }
 
 .envelope:hover .envelope-icon {
-    transform: scale(1.1); /* Makes it grow when she hovers */
+    transform: scale(1.1); 
 }
         
 
@@ -389,7 +389,7 @@
         /* 1.  */
 .gift {
     position: relative;
-    width: 220px; /* Adjust based on your layout */
+    width: 220px; 
     height: 180px;
     background: transparent !important;
     background-color: rgba(0,0,0,0) !important;
@@ -402,7 +402,7 @@
     cursor: pointer;
 }
 
-/* 2. The Image: Sharp and ready */
+
 .gift-img {
     width: 190px; /* Adjust size here */
     height: auto;
@@ -410,7 +410,7 @@
     transition: transform 0.2s ease;
 }
 
-/* 3. The Animation Class: JavaScript will trigger this */
+
 .gift-pop-effect {
     animation: giftPop 0.4s ease-out forwards;
 }
@@ -418,7 +418,7 @@
 @keyframes giftPop {
     0% { transform: scale(1); opacity: 1; }
     45% { transform: scale(1.4); opacity: 1; }
-    100% { transform: scale(1.8); opacity: 0; } /* This makes it vanish! */
+    100% { transform: scale(1.8); opacity: 0; } 
 }
            
         @keyframes giftFloat {
@@ -430,7 +430,7 @@
             box-shadow: 0 26px 46px rgba(248, 113, 113, 0.9);
         }
 
-        /* gift image replaces internal present parts */
+    
 
         /* ===== CENTER BOTTOM - INSTRUCTIONS ===== */
         .instructions-section {
@@ -791,35 +791,29 @@ Cheers to YOU!
         const cakeImg = document.getElementById("cakeImage");
         const tapText = document.getElementById("tapText");
 
-        // ========== 2. MASTER GIFT CLICK (The Trigger) ==========
-        window.addEventListener('load', () => {
-            const giftBtn = document.getElementById('giftBtn');
-            const giftImg = document.querySelector('.gift-img');
-            const guitarMusic = document.getElementById('guitarAudio');
+        // ========= GIFT CLICK (The Trigger) ==========
+      giftBtn.addEventListener('click', () => {
+                if (isCakeBlown) return; 
 
-            if (giftBtn) {
-                giftBtn.addEventListener('click', () => {
-                    if (isCakeBlown) return; 
+                // 1. STOP the flickering immediately
+                if (flameInterval) clearInterval(flameInterval);
 
-                    // A. Trigger Pixel Explosion
-                    createPixelExplosion(); 
+                // 2. Trigger the explosion
+                if (typeof createPixelExplosion === "function") createPixelExplosion();
+                if (giftImg) giftImg.classList.add('gift-pop-effect');
 
-                    // B. Start Pop & Fade Animation
-                    if (giftImg) giftImg.classList.add('gift-pop-effect');
+                // 3. Play Music at lower volume (Ducking)
+                if (guitarMusic) {
+                    guitarMusic.volume = 0.3; 
+                    guitarMusic.play().catch(e => console.log("Audio waiting..."));
+                }
 
-                    // C. Play Music
-                    if (guitarMusic) {
-                        guitarMusic.volume = 0.6;
-                        guitarMusic.play().catch(e => console.log("Audio waiting for interaction..."));
-                    }
-
-                    // D. Start Microphone logic
+                // 4. Start Microphone with a 500ms delay
+                setTimeout(() => {
                     initializeBlow();
-                });
-            }
-        });
-
-        // ========== 3. UNIFIED BLOW MECHANICS ==========
+                }, 500);
+            });
+        // ========== 3 BLOW MECHANICS ==========
         function initializeBlow() {
             if (blowDetectionActive) return;
             
@@ -846,10 +840,10 @@ Cheers to YOU!
             analyser.getByteFrequencyData(dataArray);
 
             let lowFreqEnergy = 0;
-            for (let i = 0; i < 10; i++) { lowFreqEnergy += dataArray[i]; }
-            lowFreqEnergy /= 10;
+            for (let i = 0; i < 6; i++) { lowFreqEnergy += dataArray[i]; }
+            lowFreqEnergy /= 6;
 
-            if (lowFreqEnergy > 105) triggerBlowAnimation(lowFreqEnergy);
+            if (lowFreqEnergy > 145) triggerBlowAnimation(lowFreqEnergy);
             requestAnimationFrame(detectBlow);
         }
 
@@ -857,9 +851,9 @@ Cheers to YOU!
             if (isCakeBlown) return;
 
             let newState = 0;
-            if (intensity > 105) newState = 1;
-            if (intensity > 140) newState = 2;
-            if (intensity > 180) newState = 3;
+            if (intensity > 145) newState = 1;
+            if (intensity > 165) newState = 2;
+            if (intensity > 190) newState = 3;
             if (intensity > 220) newState = 4;
 
             if (newState > currentBlowState) {
@@ -878,7 +872,7 @@ Cheers to YOU!
 
             triggerConfetti(90);
             triggerFireworks();
-            
+            if (guitarMusic) guitarMusic.volume = 0.8;
             if (celebrationInterval) clearInterval(celebrationInterval);
             let repeats = 0;
             celebrationInterval = setInterval(() => {
